@@ -20,9 +20,9 @@ func data() (map[int]bool, int) {
 	return data, len
 }
 
-func findRangeData(data map[int]bool, int){
-	len := 
-}
+// func findRangeData(data map[int]bool, int){
+// 	len :=
+// }
 
 type master struct {
 	root *node
@@ -53,7 +53,7 @@ func NewMaster(min, max int) master {
 
 func main() {
 	// datas, y := data()
-	root := NewMaster(0, 100)
+	// root := NewMaster(0, 100)
 
 	// fmt.Println(datas, y)
 }

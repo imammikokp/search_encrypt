@@ -40,8 +40,9 @@ func (c customerRepository)FetchByRange(ctx context.Context, model interface{} ,
 		).Where("id >= ? AND id id <= ?", minId,maxId ).Model(&model).Error
 }
 
-func (c customerRepository)GetCountAll(ctx context.Context,Count int64) (error){
+func (c customerRepository)GetCountAll(ctx context.Context) (int64,error){
 	db := c.db.WithContext(ctx)
-	return db.Model(&domain.Customer{}).Count(&Count).Error
+	var count int64
+	return count,db.Model(&domain.Customer{}).Count(&count).Error
 }
 

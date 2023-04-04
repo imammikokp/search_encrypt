@@ -128,11 +128,33 @@ func (r Customer) TableName() string {
 	return "customers"
 }
 
+type EncryptCustomer struct {
+	LegalName                   string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
+	FullName                    string `gorm:"type:varchar(150);column:full_name"`
+	BirthPlace                  string `gorm:"type:varchar(100);column:birth_place"`
+	SurgateMotherName           string `gorm:"type:varchar(100);column:surgate_mother_name"`
+	MobilePhone                 string `gorm:"type:varchar(50);column:mobile_phone"`
+	Email                       string `gorm:"type:varchar(100);column:email;index:idx_customers_varchar;index:idx_customers_email,unique"`
+	ResidenceAddress            string `gorm:"type:varchar(200);column:residence_address"`
+	ResidencePhone1             string `gorm:"type:varchar(50);column:residence_phone1"`
+	LegalAddress                string `gorm:"type:varchar(200);column:legal_address"`
+	LegalPhone1                 string `gorm:"type:varchar(50);column:legal_phone1"`
+	CompanyAddress              string `gorm:"type:varchar(200);column:company_address"`
+	CompanyPhone1               string `gorm:"type:varchar(50);column:company_phone1"`
+	EmergencyContactName        string `gorm:"type:varchar(50);column:emergency_contact_name"`
+	EmergencyContactAddress     string `gorm:"type:varchar(200);column:emergency_contact_address"`
+	EmergencyContactHomePhone1  string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
+	EmergencyContactMobilePhone string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
+}
+type CustomerRepository interface {
+	FetchByRange(ctx context.Context, model interface{}, minId int, maxId int) error
+	GetCountAll(ctx context.Context) (int64,error)
+}
 
-type CustomerRepository interface{
-	FetchByRange(ctx context.Context, model interface{} ,minId int, maxId int )error
-} 
+func (r EncryptCustomer) TableName() string {
+	return "customers"
+}
 
-type CustomerUseCase interface{
-	
+type CustomerUseCase interface {
+	CheckLength()(int64,error)
 }
