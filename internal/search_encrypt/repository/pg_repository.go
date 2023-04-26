@@ -7,17 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type customerRepository struct {
+type searchEncryptRepository struct {
 	db *gorm.DB
 }
 
-func NewCustomerRepository(db *gorm.DB) domain.CustomerRepository{
-	return &customerRepository{
+func NewSearchEncryptRepository(db *gorm.DB) domain.SearchEncryptRepository{
+	return &searchEncryptRepository{
 		db:db,
 	}
 }
 
-func (c customerRepository)FetchByRange(ctx context.Context, model interface{} ,minId int, maxId int )error{
+func (c searchEncryptRepository)FetchByRange(ctx context.Context, model interface{} ,minId int, maxId int )error{
 	db := c.db.WithContext(ctx)
 	return	db.Select(
 		"(SELECT DEC_B64('SEC',customers.legal_name) AS legal_name)",
@@ -40,9 +40,11 @@ func (c customerRepository)FetchByRange(ctx context.Context, model interface{} ,
 		).Where("id >= ? AND id id <= ?", minId,maxId ).Model(&model).Error
 }
 
-func (c customerRepository)GetCountAll(ctx context.Context) (int64,error){
+func (c searchEncryptRepository)GetCountAll(ctx context.Context) (int64,error){
 	db := c.db.WithContext(ctx)
 	var count int64
 	return count,db.Model(&domain.Customer{}).Count(&count).Error
 }
+
+
 

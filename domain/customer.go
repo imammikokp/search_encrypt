@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )
 
@@ -146,7 +147,7 @@ type EncryptCustomer struct {
 	EmergencyContactHomePhone1  string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
 	EmergencyContactMobilePhone string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
 }
-type CustomerRepository interface {
+type SearchEncryptRepository interface {
 	FetchByRange(ctx context.Context, model interface{}, minId int, maxId int) error
 	GetCountAll(ctx context.Context) (int64,error)
 }
@@ -155,6 +156,10 @@ func (r EncryptCustomer) TableName() string {
 	return "customers"
 }
 
-type CustomerUseCase interface {
+type SearchEncryptUseCase interface {
 	CheckLength()(int64,error)
+}
+type  SearchEncryptCmdHandler interface{
+	CountAll() *cobra.Command
+	FindInvalidEncryptByRange() *cobra.Command 
 }
