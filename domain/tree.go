@@ -6,7 +6,7 @@ import (
 )
 
 type Root struct {
-	root *Node
+	Root *Node
 }
 
 type Node struct {
@@ -18,7 +18,7 @@ type Node struct {
 
 func NewRoot(min, max int) *Root {
 	return &Root{
-		root: &Node{
+		Root: &Node{
 			Min: min,
 			Max: max,
 		},
@@ -65,11 +65,16 @@ func DevidedEqually(t *Node) {
 func RemoveEqualByMinMax(parentN *Node, childN *Node, min int, max int) bool {
 	if parentN != nil {
 		fmt.Println(min, max, childN.Min, childN.Max)
-		if childN.Min == min && childN.Max == max {
+
+		if parentN.Left != nil{
 			if parentN.Left.Min == min && parentN.Left.Max == max {
 				parentN.Left = nil
 				return true
-			} else if parentN.Right.Min == min && parentN.Right.Max == max {
+			}
+		}
+
+		if parentN.Right != nil{
+			if parentN.Right.Min == min && parentN.Right.Max == max {
 				parentN.Right = nil
 				return true
 			}

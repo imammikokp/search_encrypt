@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"serch_encrypt/domain"
 
+	"serch_encrypt/pkg"
+
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +44,7 @@ func (r searchEnctyptCmdHandler) FindInvalidEncryptByRange() *cobra.Command {
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 
-
+			r.SearchEncryptUseCase.FindAndSaveInvalidEncryptByRange(pkg.StringToInt(args[0]),pkg.StringToInt(args[1]))
 
 		},
 	}

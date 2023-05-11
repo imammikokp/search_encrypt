@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
@@ -26,7 +27,9 @@ func main() {
 	}
 
 	customerDomainDsn := "host=35.219.112.128 user=developer password=kreditmu30 dbname=customer_domain port=5432 sslmode=disable TimeZone=Asia/Jakarta"
-	customerDomainDb, err := gorm.Open(postgres.Open(customerDomainDsn), &gorm.Config{})
+	customerDomainDb, err := gorm.Open(postgres.Open(customerDomainDsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		panic(err.Error())
 	}

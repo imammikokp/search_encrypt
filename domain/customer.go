@@ -130,6 +130,7 @@ func (r Customer) TableName() string {
 }
 
 type EncryptCustomer struct {
+	ID                          int    `gorm:"primarykey;autoIncrement:true"`
 	LegalName                   string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
 	FullName                    string `gorm:"type:varchar(150);column:full_name"`
 	BirthPlace                  string `gorm:"type:varchar(100);column:birth_place"`
@@ -147,19 +148,23 @@ type EncryptCustomer struct {
 	EmergencyContactHomePhone1  string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
 	EmergencyContactMobilePhone string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
 }
-type SearchEncryptRepository interface {
-	FetchByRange(ctx context.Context, model interface{}, minId int, maxId int) error
-	GetCountAll(ctx context.Context) (int64,error)
-}
 
 func (r EncryptCustomer) TableName() string {
 	return "customers"
 }
 
-type SearchEncryptUseCase interface {
-	CheckLength()(int64,error)
+type SearchEncryptRepository interface {
+	FetchByRange(ctx context.Context, model interface{}, minId int, maxId int) error
+	GetCountAll(ctx context.Context) (int64, error)
+	FindById(ctx context.Context, model interface{}, id int)error
 }
-type  SearchEncryptCmdHandler interface{
+
+type SearchEncryptUseCase interface {
+	CheckLength() (int64, error)
+	FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error)
+}
+
+type SearchEncryptCmdHandler interface {
 	CountAll() *cobra.Command
-	FindInvalidEncryptByRange() *cobra.Command 
+	FindInvalidEncryptByRange() *cobra.Command
 }

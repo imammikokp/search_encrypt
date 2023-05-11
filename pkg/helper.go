@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"math"
+	"strconv"
 )
 
 func MedianRangeValue(min, max int) (leftMin, leftMax, rightMin, rightMax int) {
@@ -11,4 +12,13 @@ func MedianRangeValue(min, max int) (leftMin, leftMax, rightMin, rightMax int) {
 	rightMin = int(MedianValue) + min + 1
 	rightMax = max
 	return
+}
+
+func StringToInt(value string) int {
+
+	if value != "" {
+		result, _ := strconv.Atoi(value)
+		return result
+	}
+	return 0
 }

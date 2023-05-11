@@ -1,0 +1,64 @@
+// func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error) {
+// 	ctxB := context.Background()
+// 	ctx, cancel := context.WithTimeout(ctxB, r.contexTimeout)
+// 	defer cancel()
+// 	// make root
+// 	root := domain.NewRoot(minId, maxId)
+// 	// save invalid model encrypt
+// 	var InvalidModelEncrypt []domain.EncryptCustomer
+// 	// cari yang terdekat di kiri
+// 	parent, child := domain.NearestSearch(nil, root.Root)
+// 	fmt.Println("->", parent, child)
+// 	// ada child
+// 	if child != nil {
+// 		// encrypt customer
+// 		var modelEncrypt []domain.EncryptCustomer
+// 		if err := r.customerRepository.FetchByRange(ctx, &modelEncrypt, child.Min, child.Max); err != nil {
+// 			if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
+// 				//min dan max id jaraknya 1
+// 				if (maxId - minId) == 1 {
+// 					var encyrptCustomer domain.EncryptCustomer
+// 					if err := r.customerRepository.FindById(ctx, encyrptCustomer, child.Min); err != nil {
+// 						if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
+// 							//simpan invalid
+// 							InvalidModelEncrypt = append(InvalidModelEncrypt, encyrptCustomer)
+// 						} else {
+// 							funcError = err
+// 						}
+// 					}
+
+// 					if err := r.customerRepository.FindById(ctx, encyrptCustomer, child.Max); err != nil {
+// 						if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
+// 							//simpan invalid
+// 							InvalidModelEncrypt = append(InvalidModelEncrypt, encyrptCustomer)
+// 						} else {
+// 							funcError = err
+// 						}
+// 					}
+
+// 					// remove sesuai min max
+// 					domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
+
+// 				} else {
+// 					// dibagi dua
+// 					domain.DevidedEqually(child)
+// 					parent, child := domain.NearestSearch(nil, root.Root)
+// 				}
+// 				//stringify
+// 				domain.Stringify(root.Root, 0)
+// 			} else {
+// 				funcError = err
+// 			}
+// 		}
+// 		removeSuccessStatus := domain.RemoveEqualByMinMax(parent, child, minId, maxId)
+// 		if !removeSuccessStatus {
+// 			if root.Root.Max == maxId && root.Root.Min == minId {
+// 				root.Root = nil
+// 			}
+// 		}
+// 	}
+// 	domain.Stringify(root.Root, 0)
+
+// 	fmt.Println("->", InvalidModelEncrypt)
+// 	return
+// }
