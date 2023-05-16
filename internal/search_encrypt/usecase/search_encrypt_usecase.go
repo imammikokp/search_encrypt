@@ -14,12 +14,14 @@ import (
 
 type searchEncryptUseCase struct {
 	customerRepository domain.SearchEncryptRepository
+	InvalidEncryptionRepository domain.InvalidEncryptionRepository
 	contexTimeout      time.Duration
 }
 
-func NewSearchEncryptUseCase(contextTimeout time.Duration, customerRepository domain.SearchEncryptRepository) domain.SearchEncryptUseCase {
+func NewSearchEncryptUseCase(contextTimeout time.Duration, customerRepository domain.SearchEncryptRepository,InvalidEncryptionRepository domain.InvalidEncryptionRepository) domain.SearchEncryptUseCase {
 	return &searchEncryptUseCase{
 		customerRepository: customerRepository,
+		InvalidEncryptionRepository:InvalidEncryptionRepository,
 		contexTimeout:      contextTimeout,
 	}
 }
@@ -40,7 +42,7 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 	ctx, cancel := context.WithTimeout(ctxB, r.contexTimeout)
 	defer cancel()
 	root := domain.NewRoot(minId, maxId)
-	var InvalidModelEncrypt []int
+	var InvalidEncrypts []int
 	for {
 
 		if root.Root == nil {
@@ -52,22 +54,32 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 			break
 		}
 		if child != nil {
-			if findEncrypt, finish, err := r.searchEncyrpt(ctx, parent, child, InvalidModelEncrypt); err != nil {
+			if findEncrypt, finish, err := r.searchEncyrpt(ctx, parent, child, InvalidEncrypts); err != nil {
 				return 0, 0, err
 			} else {
 				if finish {
 					break
 				}
 				if findEncrypt != nil {
-					InvalidModelEncrypt = append(InvalidModelEncrypt, *findEncrypt...)
+					InvalidEncrypts = append(InvalidEncrypts, *findEncrypt...)
 				}
 			}
 		}
+
+		var invalidEncryptModels []domain.InvalidEncryption
+		for _, v := range InvalidEncrypts {
+			invalidEncryptModels = append(invalidEncryptModels, domain.InvalidEncryption{CustomerID: v})
+		}
+
+		if err:=r.InvalidEncryptionRepository.Inserts(ctx,invalidEncryptModels);err!=nil{
+			return 0,0,err
+		}
+
 		domain.Stringify(root.Root, 0)
 
 	}
-
-	fmt.Println("->result", InvalidModelEncrypt)
+	
+	// fmt.Println("->result", InvalidModelEncrypt)
 	return
 }
 

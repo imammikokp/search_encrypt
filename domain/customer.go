@@ -147,6 +147,7 @@ type EncryptCustomer struct {
 	EmergencyContactAddress     string `gorm:"type:varchar(200);column:emergency_contact_address"`
 	EmergencyContactHomePhone1  string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
 	EmergencyContactMobilePhone string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
+	EmergencyContactOfficePhone1 string `gorm:"type:varchar(50);column:emergency_contact_office_phone1"`
 }
 
 func (r EncryptCustomer) TableName() string {

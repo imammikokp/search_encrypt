@@ -5,9 +5,13 @@ package main
 
 import (
 	"serch_encrypt/domain"
-	"serch_encrypt/internal/search_encrypt/handler"
-	"serch_encrypt/internal/search_encrypt/repository"
-	"serch_encrypt/internal/search_encrypt/usecase"
+
+	searchEncryptHandler "serch_encrypt/internal/search_encrypt/handler"
+	searchEncryptRepo "serch_encrypt/internal/search_encrypt/repository"
+	searchEncryptUseCase "serch_encrypt/internal/search_encrypt/usecase"
+
+	invalidEncryptionRepo "serch_encrypt/internal/invalid_encryption/repository"
+
 	"time"
 
 	"github.com/spf13/cobra"
@@ -41,10 +45,14 @@ func main() {
 	}
 	invalidEncryptDB.AutoMigrate(&domain.InvalidEncryption{})
 
-	searchRepository:=repository.NewSearchEncryptRepository(customerDomainDb)
-	searchUseCase:=usecase.NewSearchEncryptUseCase(time.Duration(3)*time.Minute, searchRepository)
-	searchHandler:=handler.NewSearchEncryptCmdHandler(searchUseCase,rootCmd)
-	handler.Initialize(rootCmd,searchHandler)
+	invalidEncryptionRepository:=invalidEncryptionRepo.NewInvalidEncryptReposiotry(invalidEncryptDB)
+
+
+
+	searchRepository:=searchEncryptRepo.NewSearchEncryptRepository(customerDomainDb)
+	searchUseCase:=searchEncryptUseCase.NewSearchEncryptUseCase(time.Duration(3)*time.Minute, searchRepository,invalidEncryptionRepository)
+	searchHandler:=searchEncryptHandler.NewSearchEncryptCmdHandler(searchUseCase,rootCmd)
+	searchEncryptHandler.Initialize(rootCmd,searchHandler)
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Execute()
 }
