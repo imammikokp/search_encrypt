@@ -11,15 +11,15 @@ type searchEncryptRepository struct {
 	db *gorm.DB
 }
 
-func NewSearchEncryptRepository(db *gorm.DB) domain.SearchEncryptRepository{
+func NewSearchEncryptRepository(db *gorm.DB) domain.SearchEncryptRepository {
 	return &searchEncryptRepository{
-		db:db,
+		db: db,
 	}
 }
 
-func (c searchEncryptRepository)FetchByRange(ctx context.Context, model interface{} ,minId int, maxId int )error{
+func (c searchEncryptRepository) FetchByRange(ctx context.Context, model interface{}, search []int, minId int, maxId int) error {
 	db := c.db.WithContext(ctx)
-	return	db.Select(
+	db =db.Select(
 		"(SELECT DEC_B64('SEC',customers.legal_name) AS legal_name)",
 		"(SELECT DEC_B64('SEC',customers.full_name) AS full_name)",
 		"(SELECT DEC_B64('SEC',customers.birth_place) AS birth_place)",
@@ -37,12 +37,33 @@ func (c searchEncryptRepository)FetchByRange(ctx context.Context, model interfac
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_home_phone1) AS emergency_contact_home_phone1)",
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_office_phone1) AS emergency_contact_office_phone1)",
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_mobile_phone) AS emergency_contact_mobile_phone)",
-		).Where("id >= ? AND  id <= ?", minId,maxId ).Find(model).Error
+	)
+
+	if search != nil {
+		if len(search) != 0 {
+			
+			var idRangeLoad []int
+			for _, v := range search {
+				if v>= minId && v<= maxId{
+					idRangeLoad = append(idRangeLoad, v)
+				}
+			}
+			db =db.Where(`id in (select a.id from customers a where id >= ? AND id <= ? EXCEPT SELECT b.id FROM customers b where id in(?))`,minId,maxId,idRangeLoad)
+
+		}else{
+			db =db.Where("id >= ? AND  id <= ?", minId, maxId)
+		}
+	}else{
+		db =db.Where("id >= ? AND  id <= ?", minId, maxId)
+	}
+
+	return db.Find(model).Error
+	
 }
 
-func (c searchEncryptRepository)FindById(ctx context.Context, model interface{}, id int)error{
+func (c searchEncryptRepository) FindById(ctx context.Context, model interface{}, id int) error {
 	db := c.db.WithContext(ctx)
-		return	db.Select(
+	return db.Select(
 		"(SELECT DEC_B64('SEC',customers.legal_name) AS legal_name)",
 		"(SELECT DEC_B64('SEC',customers.full_name) AS full_name)",
 		"(SELECT DEC_B64('SEC',customers.birth_place) AS birth_place)",
@@ -60,15 +81,11 @@ func (c searchEncryptRepository)FindById(ctx context.Context, model interface{},
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_home_phone1) AS emergency_contact_home_phone1)",
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_office_phone1) AS emergency_contact_office_phone1)",
 		"(SELECT DEC_B64('SEC',customers.emergency_contact_mobile_phone) AS emergency_contact_mobile_phone)",
-		).Where("id = ?", id ).First(model).Error
+	).Where("id = ?", id).First(model).Error
 }
 
-
-func (c searchEncryptRepository)GetCountAll(ctx context.Context) (int64,error){
+func (c searchEncryptRepository) GetCountAll(ctx context.Context) (int64, error) {
 	db := c.db.WithContext(ctx)
 	var count int64
-	return count,db.Model(&domain.Customer{}).Count(&count).Error
+	return count, db.Model(&domain.Customer{}).Count(&count).Error
 }
-
-
-

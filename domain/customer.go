@@ -154,7 +154,7 @@ func (r EncryptCustomer) TableName() string {
 }
 
 type SearchEncryptRepository interface {
-	FetchByRange(ctx context.Context, model interface{}, minId int, maxId int) error
+	FetchByRange(ctx context.Context, model interface{}, search []int  ,minId int, maxId int )error
 	GetCountAll(ctx context.Context) (int64, error)
 	FindById(ctx context.Context, model interface{}, id int)error
 }

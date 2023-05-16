@@ -63,23 +63,6 @@ func DevidedEqually(t *Node) {
 }
 
 func RemoveEqualByMinMax(parentN *Node, childN *Node, min int, max int) bool {
-	if parentN != nil {
-		fmt.Println(min, max, childN.Min, childN.Max)
-
-		if parentN.Left != nil{
-			if parentN.Left.Min == min && parentN.Left.Max == max {
-				parentN.Left = nil
-				return true
-			}
-		}
-
-		if parentN.Right != nil{
-			if parentN.Right.Min == min && parentN.Right.Max == max {
-				parentN.Right = nil
-				return true
-			}
-		}
-	}
 
 	if childN.Left != nil {
 		if min >= childN.Left.Min && max <= childN.Left.Max {
@@ -90,6 +73,24 @@ func RemoveEqualByMinMax(parentN *Node, childN *Node, min int, max int) bool {
 	if childN.Right != nil {
 		if max >= childN.Right.Min && max <= childN.Right.Max {
 			return RemoveEqualByMinMax(childN, childN.Right, min, max)
+		}
+	}
+	if parentN != nil {
+		fmt.Println("->RemoveEqualByMinMax", parentN, parentN.Right, parentN.Left, min, max, childN.Min, childN.Max)
+
+		if parentN.Left != nil {
+			if parentN.Left.Min == min && parentN.Left.Max == max {
+				parentN.Left = nil
+				return true
+			}
+		}
+
+		if parentN.Right != nil {
+			if parentN.Right.Min == min && parentN.Right.Max == max {
+				fmt.Println("-> masuk")
+				parentN.Right = nil
+				return true
+			}
 		}
 	}
 

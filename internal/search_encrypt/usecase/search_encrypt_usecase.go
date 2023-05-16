@@ -2,11 +2,14 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"serch_encrypt/domain"
 	"strings"
 
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type searchEncryptUseCase struct {
@@ -32,110 +35,110 @@ func (r searchEncryptUseCase) CheckLength() (int64, error) {
 	return count, nil
 }
 
-
-
 func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error) {
 	ctxB := context.Background()
 	ctx, cancel := context.WithTimeout(ctxB, r.contexTimeout)
 	defer cancel()
-	// make root
 	root := domain.NewRoot(minId, maxId)
-	// save invalid model encrypt
 	var InvalidModelEncrypt []int
-	// cari yang terdekat di kiri
-	
 	for {
-		parent, child := domain.NearestSearch(nil, root.Root)
-		if child == nil{
+
+		if root.Root == nil {
+			break
+		}
+
+		parent, child := domain.NearestSearch(root.Root, root.Root)
+		if child == nil {
 			break
 		}
 		if child != nil {
-			if findEncrypt, err := r.SearchEncyrpt(ctx, parent, child); err != nil {
-				return 0,0,err
-			}else{
-				if findEncrypt != nil{
-					InvalidModelEncrypt = append(InvalidModelEncrypt,*findEncrypt )
+			if findEncrypt, finish, err := r.searchEncyrpt(ctx, parent, child, InvalidModelEncrypt); err != nil {
+				return 0, 0, err
+			} else {
+				if finish {
+					break
+				}
+				if findEncrypt != nil {
+					InvalidModelEncrypt = append(InvalidModelEncrypt, *findEncrypt...)
 				}
 			}
 		}
 		domain.Stringify(root.Root, 0)
-		fmt.Println("-> find and save", InvalidModelEncrypt)
+
 	}
 
-
+	fmt.Println("->result", InvalidModelEncrypt)
 	return
 }
 
-func (r searchEncryptUseCase) SearchEncyrpt(ctx context.Context, parent *domain.Node, child *domain.Node) (*int, error) {
+func (r searchEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.Node, child *domain.Node, inEncryptResults []int) (*[]int, bool, error) {
 	// encrypt customer
 	var modelEncrypt []domain.EncryptCustomer
-	fmt.Println("-> child", child, child.Max-child.Min)
-	if err := r.customerRepository.FetchByRange(ctx, &modelEncrypt, child.Min, child.Max); err != nil {
-		fmt.Println("->modelEncrypt",modelEncrypt)
+
+	if err := r.customerRepository.FetchByRange(ctx, &modelEncrypt, inEncryptResults, child.Min, child.Max); err != nil {
+
 		if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 			//min dan max id jaraknya 1
 			if (child.Max - child.Min) <= 1 {
-				fmt.Println("-> masuk child")
+				var inEncryptResult []int
 				var encyrptCustomer domain.EncryptCustomer
 				if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Min); err != nil {
 					if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 						//simpan invalid
-						fmt.Println("->", child.Min,parent.Left,parent.Right)
+						fmt.Println("->child test",parent,child)
 						domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
-						return &child.Min, nil
+						inEncryptResult = append(inEncryptResult, child.Min)
+					} else if errors.Is(err, gorm.ErrRecordNotFound) {
+						
+
 					} else {
-						return nil, err
+						return nil, false, err
 					}
 				}
 
-				if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Max); err != nil {
-					if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
-						//simpan invalid
-						fmt.Println("->", child.Max,parent.Left,parent.Right)
-						domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
-						return &child.Max, nil
-					} else {
-						return nil, err
+				if child.Min != child.Max{
+					if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Max); err != nil {
+						if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
+							//simpan invalid
+							fmt.Println("->child test",parent,child)
+							domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
+							inEncryptResult = append(inEncryptResult, child.Max)
+						} else if errors.Is(err, gorm.ErrRecordNotFound) {
+						
+	
+						} else {
+							return nil, false, err
+						}
 					}
 				}
 
-				// remove sesuai min max
-				
+				if len(inEncryptResult)!=0{
+					return &inEncryptResult,false,nil
+				}
 
 			} else {
-				// dibagi dua
 				domain.DevidedEqually(child)
 				Nearparent, NearChild := domain.NearestSearch(nil, child)
-				if result, err := r.SearchEncyrpt(ctx, Nearparent, NearChild); err != nil {
-					return nil, err
+				if result, _, err := r.searchEncyrpt(ctx, Nearparent, NearChild, inEncryptResults); err != nil {
+					return nil, false, err
 				} else {
-					return result, nil
+					return result, false, nil
 				}
 
 			}
-			//stringify
-			// domain.Stringify(parent, 0)
 		} else {
-			return nil, err
+			return nil, false, err
 		}
 	} else {
-		fmt.Println("-> min max", parent, child.Min, child.Max)
+		domain.Stringify(parent, 0)
 		removeSuccessStatus := domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
-		fmt.Println("-> remove status", removeSuccessStatus)
+		fmt.Println("->remove",removeSuccessStatus)
+		domain.Stringify(parent, 0)
 		if !removeSuccessStatus {
-			// if parent.Max == child.Max && parent.Min == child.Min {
-			// 	parent = nil
-			// }
-			if parent.Left == nil && parent.Right == nil{
-				return nil, nil
-			}	
-		}
-		Parent1, child1 := domain.NearestSearch(nil, parent)
-		if result, err := r.SearchEncyrpt(ctx, Parent1, child1); err != nil {
-			return nil, err
-		} else {
-			return result, nil
+			if parent.Max == child.Max && parent.Min == child.Min {
+				return nil, true, nil
+			}
 		}
 	}
-	return nil, nil
+	return nil, false, nil
 }
