@@ -30,7 +30,7 @@ func main() {
 		// Run: func(cmd *cobra.Command, args []string) { },
 	}
 
-	customerDomainDsn := "host=35.219.112.128 user=developer password=kreditmu30 dbname=customer_domain port=5432 sslmode=disable TimeZone=Asia/Jakarta"
+	customerDomainDsn := "host= user= password= dbname= port=5432 sslmode=disable TimeZone=Asia/Jakarta"
 	customerDomainDb, err := gorm.Open(postgres.Open(customerDomainDsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
@@ -38,7 +38,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	invalidEncryptDsn := "host=localhost user=postgres password=admin dbname=invalid_encryption port=5432 sslmode=disable TimeZone=Asia/Jakarta"
+	invalidEncryptDsn := "host=localhost user=postgres password= dbname=invalid_encryption port=5432 sslmode=disable TimeZone=Asia/Jakarta"
 	invalidEncryptDB, err := gorm.Open(postgres.Open(invalidEncryptDsn), &gorm.Config{})
 	if err != nil {
 		panic(err.Error())
