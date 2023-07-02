@@ -1,0 +1,30 @@
+{
+  "database_customers": {
+    "debug": true,
+    "driver": "postgres",
+    "host": "35.219.112.128",
+    "username": "developer",
+    "password": "kreditmu30",
+    "name": "customer_domain",
+    "port": 5432,
+    "options": "TimeZone=Asia/Jakarta",
+    "maxOpenConn": 100,
+    "maxIdleConn": 100,
+    "maxLifeTimeConn": 450,
+    "maxIdleTimeConn": 450
+  },
+  "database_invalid_encryption_customers": {
+    "debug": true,
+    "driver": "postgres",
+    "host": "localhost",
+    "username": "postgres",
+    "password": "admin",
+    "name": "invalid_encryption",
+    "port": 5432,
+    "options": "TimeZone=Asia/Jakarta",
+    "maxOpenConn": 100,
+    "maxIdleConn": 100,
+    "maxLifeTimeConn": 450,
+    "maxIdleTimeConn": 450
+  }
+}

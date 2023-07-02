@@ -51,3 +51,5 @@ func (r searchEnctyptCmdHandler) FindInvalidEncryptByRange() *cobra.Command {
 
 	return countAll
 }
+
+
