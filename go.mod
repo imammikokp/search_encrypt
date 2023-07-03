@@ -1,4 +1,4 @@
-module serch_encrypt
+module search_encrypt
 
 go 1.19
 

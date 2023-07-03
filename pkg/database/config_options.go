@@ -73,18 +73,18 @@ func configFromEnvironment(getEnv map[string]string) ConfigOption {
 		} else {
 			config.Debug = parse
 		}
-		if parse, err := strconv.Atoi(getEnv["maxopenconn"]); err == nil {
-			config.MaxOpenConnection = parse
-		}
-		if parse, err := strconv.Atoi(getEnv["maxidleconn"]); err == nil {
-			config.MaxIdleConnection = parse
-		}
-		if parse, err := strconv.Atoi(getEnv["maxlifetimeconn"]); err == nil {
-			config.MaxLifeTimeConnection = parse
-		}
-		if parse, err := strconv.Atoi(getEnv["maxidletimeconn"]); err == nil {
-			config.MaxIdleTimeConnection = parse
-		}
+		// if parse, err := strconv.Atoi(getEnv["maxopenconn"]); err == nil {
+		// 	config.MaxOpenConnection = parse
+		// }
+		// if parse, err := strconv.Atoi(getEnv["maxidleconn"]); err == nil {
+		// 	config.MaxIdleConnection = parse
+		// }
+		// if parse, err := strconv.Atoi(getEnv["maxlifetimeconn"]); err == nil {
+		// 	config.MaxLifeTimeConnection = parse
+		// }
+		// if parse, err := strconv.Atoi(getEnv["maxidletimeconn"]); err == nil {
+		// 	config.MaxIdleTimeConnection = parse
+		// }
 		if parse, err := strconv.ParseBool(getEnv["newrelicintegration"]); err != nil {
 			config.NewrelicIntegration = false
 		} else {

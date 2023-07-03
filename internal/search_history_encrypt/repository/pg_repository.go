@@ -49,7 +49,7 @@ func (c searchHistoryEncryptRepository) FetchByRange(ctx context.Context, model 
 					idRangeLoad = append(idRangeLoad, v)
 				}
 			}
-			db =db.Where(`id in (select a.id from history.customers a where id >= ? AND id <= ? EXCEPT SELECT b.id FROM customers b where id in(?))`,minId,maxId,idRangeLoad)
+			db =db.Where(`id in (select a.id from history.customers a where id >= ? AND id <= ? EXCEPT SELECT b.id FROM history.customers b where id in(?))`,minId,maxId,idRangeLoad)
 
 		}else{
 			db =db.Where("id >= ? AND  id <= ?", minId, maxId)

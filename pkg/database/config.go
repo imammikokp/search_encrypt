@@ -51,10 +51,10 @@ func defaultDatabaseConfig() Config {
 
 	config := Config{
 		Debug:                 true,
-		MaxOpenConnection:     DefaultMaxOpenConnection,
-		MaxIdleConnection:     DefaultMaxIdleConnection,
-		MaxLifeTimeConnection: DefaultMaxLifeTimeConnection,
-		MaxIdleTimeConnection: DefaultMaxIdleTimeConnection,
+		// MaxOpenConnection:     DefaultMaxOpenConnection,
+		// MaxIdleConnection:     DefaultMaxIdleConnection,
+		// MaxLifeTimeConnection: DefaultMaxLifeTimeConnection,
+		// MaxIdleTimeConnection: DefaultMaxIdleTimeConnection,
 		NewrelicIntegration:   false,
 	}
 

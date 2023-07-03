@@ -76,7 +76,6 @@ func RemoveEqualByMinMax(parentN *Node, childN *Node, min int, max int) bool {
 		}
 	}
 	if parentN != nil {
-		fmt.Println("->RemoveEqualByMinMax", parentN, parentN.Right, parentN.Left, min, max, childN.Min, childN.Max)
 
 		if parentN.Left != nil {
 			if parentN.Left.Min == min && parentN.Left.Max == max {
@@ -87,7 +86,6 @@ func RemoveEqualByMinMax(parentN *Node, childN *Node, min int, max int) bool {
 
 		if parentN.Right != nil {
 			if parentN.Right.Min == min && parentN.Right.Max == max {
-				fmt.Println("-> masuk")
 				parentN.Right = nil
 				return true
 			}

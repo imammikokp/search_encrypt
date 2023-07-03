@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"search_encrypt/domain"
 	"strings"
 
@@ -13,16 +12,16 @@ import (
 )
 
 type searchEncryptUseCase struct {
-	customerRepository domain.SearchEncryptRepository
+	customerRepository          domain.SearchEncryptRepository
 	InvalidEncryptionRepository domain.InvalidEncryptionRepository
-	contexTimeout      time.Duration
+	contexTimeout               time.Duration
 }
 
-func NewSearchEncryptUseCase(contextTimeout time.Duration, customerRepository domain.SearchEncryptRepository,InvalidEncryptionRepository domain.InvalidEncryptionRepository) domain.SearchEncryptUseCase {
+func NewSearchEncryptUseCase(contextTimeout time.Duration, customerRepository domain.SearchEncryptRepository, InvalidEncryptionRepository domain.InvalidEncryptionRepository) domain.SearchEncryptUseCase {
 	return &searchEncryptUseCase{
-		customerRepository: customerRepository,
-		InvalidEncryptionRepository:InvalidEncryptionRepository,
-		contexTimeout:      contextTimeout,
+		customerRepository:          customerRepository,
+		InvalidEncryptionRepository: InvalidEncryptionRepository,
+		contexTimeout:               contextTimeout,
 	}
 }
 
@@ -57,7 +56,6 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 			if findEncrypt, finish, err := r.searchEncyrpt(ctx, parent, child, InvalidEncrypts); err != nil {
 				return 0, 0, err
 			} else {
-				fmt.Println("search encytp ->",findEncrypt,finish,err)
 				if finish {
 					break
 				}
@@ -66,21 +64,16 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 				}
 			}
 		}
-
-		var invalidEncryptModels []domain.InvalidEncryption
+	}
+	var invalidEncryptModels []domain.InvalidEncryption
+	if InvalidEncrypts != nil {
 		for _, v := range InvalidEncrypts {
 			invalidEncryptModels = append(invalidEncryptModels, domain.InvalidEncryption{CustomerID: v})
 		}
-		fmt.Println("invalid ->",invalidEncryptModels)
-		if err:=r.InvalidEncryptionRepository.Inserts(ctx,invalidEncryptModels);err!=nil{
-			return 0,0,err
+		if err := r.InvalidEncryptionRepository.Inserts(ctx, invalidEncryptModels); err != nil {
+			return 0, 0, err
 		}
-
-		domain.Stringify(root.Root, 0)
-
 	}
-	
-	// fmt.Println("->result", InvalidModelEncrypt)
 	return
 }
 
@@ -88,45 +81,41 @@ func (r searchEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.
 	// encrypt customer
 	var modelEncrypt []domain.EncryptCustomer
 
+	var inEncryptResult []int
 	if err := r.customerRepository.FetchByRange(ctx, &modelEncrypt, inEncryptResults, child.Min, child.Max); err != nil {
 
 		if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 			//min dan max id jaraknya 1
 			if (child.Max - child.Min) <= 1 {
-				var inEncryptResult []int
 				var encyrptCustomer domain.EncryptCustomer
 				if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Min); err != nil {
 					if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 						//simpan invalid
-						fmt.Println("->child test",parent,child)
 						domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
 						inEncryptResult = append(inEncryptResult, child.Min)
 					} else if errors.Is(err, gorm.ErrRecordNotFound) {
-						
 
 					} else {
 						return nil, false, err
 					}
 				}
 
-				if child.Min != child.Max{
+				if child.Min != child.Max {
 					if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Max); err != nil {
 						if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 							//simpan invalid
-							fmt.Println("->child test",parent,child)
 							domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
 							inEncryptResult = append(inEncryptResult, child.Max)
 						} else if errors.Is(err, gorm.ErrRecordNotFound) {
-						
-	
+
 						} else {
 							return nil, false, err
 						}
 					}
 				}
 
-				if len(inEncryptResult)!=0{
-					return &inEncryptResult,false,nil
+				if len(inEncryptResult) != 0 {
+					return &inEncryptResult, false, nil
 				}
 
 			} else {
@@ -143,13 +132,10 @@ func (r searchEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.
 			return nil, false, err
 		}
 	} else {
-		domain.Stringify(parent, 0)
 		removeSuccessStatus := domain.RemoveEqualByMinMax(parent, child, child.Min, child.Max)
-		fmt.Println("->remove",removeSuccessStatus)
-		domain.Stringify(parent, 0)
 		if !removeSuccessStatus {
 			if parent.Max == child.Max && parent.Min == child.Min {
-				return nil, true, nil
+				return &inEncryptResult, true, nil
 			}
 		}
 	}
