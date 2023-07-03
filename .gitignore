@@ -22,7 +22,7 @@ core-api
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-
+conf/app.json
 *.env
 
 *.rsa
