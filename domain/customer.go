@@ -130,23 +130,23 @@ func (r Customer) TableName() string {
 }
 
 type EncryptCustomer struct {
-	ID                          int    `gorm:"primarykey;autoIncrement:true"`
-	LegalName                   string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
-	FullName                    string `gorm:"type:varchar(150);column:full_name"`
-	BirthPlace                  string `gorm:"type:varchar(100);column:birth_place"`
-	SurgateMotherName           string `gorm:"type:varchar(100);column:surgate_mother_name"`
-	MobilePhone                 string `gorm:"type:varchar(50);column:mobile_phone"`
-	Email                       string `gorm:"type:varchar(100);column:email;index:idx_customers_varchar;index:idx_customers_email,unique"`
-	ResidenceAddress            string `gorm:"type:varchar(200);column:residence_address"`
-	ResidencePhone1             string `gorm:"type:varchar(50);column:residence_phone1"`
-	LegalAddress                string `gorm:"type:varchar(200);column:legal_address"`
-	LegalPhone1                 string `gorm:"type:varchar(50);column:legal_phone1"`
-	CompanyAddress              string `gorm:"type:varchar(200);column:company_address"`
-	CompanyPhone1               string `gorm:"type:varchar(50);column:company_phone1"`
-	EmergencyContactName        string `gorm:"type:varchar(50);column:emergency_contact_name"`
-	EmergencyContactAddress     string `gorm:"type:varchar(200);column:emergency_contact_address"`
-	EmergencyContactHomePhone1  string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
-	EmergencyContactMobilePhone string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
+	ID                           int    `gorm:"primarykey;autoIncrement:true"`
+	LegalName                    string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
+	FullName                     string `gorm:"type:varchar(150);column:full_name"`
+	BirthPlace                   string `gorm:"type:varchar(100);column:birth_place"`
+	SurgateMotherName            string `gorm:"type:varchar(100);column:surgate_mother_name"`
+	MobilePhone                  string `gorm:"type:varchar(50);column:mobile_phone"`
+	Email                        string `gorm:"type:varchar(100);column:email;index:idx_customers_varchar;index:idx_customers_email,unique"`
+	ResidenceAddress             string `gorm:"type:varchar(200);column:residence_address"`
+	ResidencePhone1              string `gorm:"type:varchar(50);column:residence_phone1"`
+	LegalAddress                 string `gorm:"type:varchar(200);column:legal_address"`
+	LegalPhone1                  string `gorm:"type:varchar(50);column:legal_phone1"`
+	CompanyAddress               string `gorm:"type:varchar(200);column:company_address"`
+	CompanyPhone1                string `gorm:"type:varchar(50);column:company_phone1"`
+	EmergencyContactName         string `gorm:"type:varchar(50);column:emergency_contact_name"`
+	EmergencyContactAddress      string `gorm:"type:varchar(200);column:emergency_contact_address"`
+	EmergencyContactHomePhone1   string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
+	EmergencyContactMobilePhone  string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
 	EmergencyContactOfficePhone1 string `gorm:"type:varchar(50);column:emergency_contact_office_phone1"`
 }
 
@@ -154,10 +154,42 @@ func (r EncryptCustomer) TableName() string {
 	return "customers"
 }
 
+type EncryptHistoryCustomer struct {
+	ID                           int `gorm:"primarykey;autoIncrement:true"`
+	CustomerId                   int    `gorm:"column:customer_id"`
+	LegalName                    string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
+	FullName                     string `gorm:"type:varchar(150);column:full_name"`
+	BirthPlace                   string `gorm:"type:varchar(100);column:birth_place"`
+	SurgateMotherName            string `gorm:"type:varchar(100);column:surgate_mother_name"`
+	MobilePhone                  string `gorm:"type:varchar(50);column:mobile_phone"`
+	Email                        string `gorm:"type:varchar(100);column:email;index:idx_customers_varchar;index:idx_customers_email,unique"`
+	ResidenceAddress             string `gorm:"type:varchar(200);column:residence_address"`
+	ResidencePhone1              string `gorm:"type:varchar(50);column:residence_phone1"`
+	LegalAddress                 string `gorm:"type:varchar(200);column:legal_address"`
+	LegalPhone1                  string `gorm:"type:varchar(50);column:legal_phone1"`
+	CompanyAddress               string `gorm:"type:varchar(200);column:company_address"`
+	CompanyPhone1                string `gorm:"type:varchar(50);column:company_phone1"`
+	EmergencyContactName         string `gorm:"type:varchar(50);column:emergency_contact_name"`
+	EmergencyContactAddress      string `gorm:"type:varchar(200);column:emergency_contact_address"`
+	EmergencyContactHomePhone1   string `gorm:"type:varchar(50);column:emergency_contact_home_phone1"`
+	EmergencyContactMobilePhone  string `gorm:"type:varchar(50);column:emergency_contact_mobile_phone"`
+	EmergencyContactOfficePhone1 string `gorm:"type:varchar(50);column:emergency_contact_office_phone1"`
+}
+
+func (r EncryptHistoryCustomer) TableName() string {
+	return "history.customers"
+}
+
 type SearchEncryptRepository interface {
-	FetchByRange(ctx context.Context, model interface{}, search []int  ,minId int, maxId int )error
+	FetchByRange(ctx context.Context, model interface{}, search []int, minId int, maxId int) error
 	GetCountAll(ctx context.Context) (int64, error)
-	FindById(ctx context.Context, model interface{}, id int)error
+	FindById(ctx context.Context, model interface{}, id int) error
+}
+
+type SearchHistoryEncryptRepository interface {
+	FetchByRange(ctx context.Context, model interface{}, search []int, minId int, maxId int) error
+	GetCountAll(ctx context.Context) (int64, error)
+	FindById(ctx context.Context, model interface{}, id int) error
 }
 
 type SearchEncryptUseCase interface {
@@ -165,7 +197,14 @@ type SearchEncryptUseCase interface {
 	FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error)
 }
 
+type SearchHistoryEncryptUseCase interface {
+	CheckLength() (int64, error)
+	FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error)
+}
+
 type SearchEncryptCmdHandler interface {
 	CountAll() *cobra.Command
 	FindInvalidEncryptByRange() *cobra.Command
+	CountAllHistory() *cobra.Command
+	FindInvalidHistoryEncryptByRange() *cobra.Command
 }

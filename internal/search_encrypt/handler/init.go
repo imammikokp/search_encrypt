@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"serch_encrypt/domain"
+	"search_encrypt/domain"
 
 	"github.com/spf13/cobra"
 )
@@ -9,4 +9,6 @@ import (
 func Initialize(cli *cobra.Command, handler domain.SearchEncryptCmdHandler) {
 	cli.AddCommand(handler.CountAll())
 	cli.AddCommand(handler.FindInvalidEncryptByRange())
+	cli.AddCommand(handler.CountAllHistory())
+	cli.AddCommand(handler.FindInvalidHistoryEncryptByRange())
 }

@@ -7,19 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type searchEncryptRepository struct {
+type searchHistoryEncryptRepository struct {
 	db *gorm.DB
 }
 
-func NewSearchEncryptRepository(db *gorm.DB) domain.SearchEncryptRepository {
-	return &searchEncryptRepository{
+func NewSearchHistoryEncryptRepository(db *gorm.DB) domain.SearchHistoryEncryptRepository {
+	return &searchHistoryEncryptRepository{
 		db: db,
 	}
 }
 
-func (c searchEncryptRepository) FetchByRange(ctx context.Context, model interface{}, search []int, minId int, maxId int) error {
+func (c searchHistoryEncryptRepository) FetchByRange(ctx context.Context, model interface{}, search []int, minId int, maxId int) error {
 	db := c.db.WithContext(ctx)
 	db =db.Select(
+		"customers.customer_id AS customers_id",
 		"(SELECT DEC_B64('SEC',customers.legal_name) AS legal_name)",
 		"(SELECT DEC_B64('SEC',customers.full_name) AS full_name)",
 		"(SELECT DEC_B64('SEC',customers.birth_place) AS birth_place)",
@@ -48,7 +49,7 @@ func (c searchEncryptRepository) FetchByRange(ctx context.Context, model interfa
 					idRangeLoad = append(idRangeLoad, v)
 				}
 			}
-			db =db.Where(`id in (select a.id from customers a where id >= ? AND id <= ? EXCEPT SELECT b.id FROM customers b where id in(?))`,minId,maxId,idRangeLoad)
+			db =db.Where(`id in (select a.id from history.customers a where id >= ? AND id <= ? EXCEPT SELECT b.id FROM customers b where id in(?))`,minId,maxId,idRangeLoad)
 
 		}else{
 			db =db.Where("id >= ? AND  id <= ?", minId, maxId)
@@ -61,9 +62,10 @@ func (c searchEncryptRepository) FetchByRange(ctx context.Context, model interfa
 	
 }
 
-func (c searchEncryptRepository) FindById(ctx context.Context, model interface{}, id int) error {
+func (c searchHistoryEncryptRepository) FindById(ctx context.Context, model interface{}, id int) error {
 	db := c.db.WithContext(ctx)
 	return db.Select(
+		"customers.customer_id",
 		"(SELECT DEC_B64('SEC',customers.legal_name) AS legal_name)",
 		"(SELECT DEC_B64('SEC',customers.full_name) AS full_name)",
 		"(SELECT DEC_B64('SEC',customers.birth_place) AS birth_place)",
@@ -84,8 +86,8 @@ func (c searchEncryptRepository) FindById(ctx context.Context, model interface{}
 	).Where("id = ?", id).First(model).Error
 }
 
-func (c searchEncryptRepository) GetCountAll(ctx context.Context) (int64, error) {
+func (c searchHistoryEncryptRepository) GetCountAll(ctx context.Context) (int64, error) {
 	db := c.db.WithContext(ctx)
 	var count int64
-	return count, db.Model(&domain.Customer{}).Count(&count).Error
+	return count, db.Model(&domain.EncryptHistoryCustomer{}).Count(&count).Error
 }

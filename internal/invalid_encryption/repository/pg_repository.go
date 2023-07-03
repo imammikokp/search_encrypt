@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"serch_encrypt/domain"
+	"search_encrypt/domain"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

@@ -5,14 +5,18 @@ package main
 
 import (
 	"fmt"
-	"serch_encrypt/domain"
-	"serch_encrypt/pkg/database"
+	"search_encrypt/domain"
+	"search_encrypt/pkg/database"
 
-	searchEncryptHandler "serch_encrypt/internal/search_encrypt/handler"
-	searchEncryptRepo "serch_encrypt/internal/search_encrypt/repository"
-	searchEncryptUseCase "serch_encrypt/internal/search_encrypt/usecase"
+	searchEncryptHandler "search_encrypt/internal/search_encrypt/handler"
+	searchEncryptRepo "search_encrypt/internal/search_encrypt/repository"
+	searchEncryptUseCase "search_encrypt/internal/search_encrypt/usecase"
 
-	invalidEncryptionRepo "serch_encrypt/internal/invalid_encryption/repository"
+	searchHistoryEncryptRepo "search_encrypt/internal/search_history_encrypt/repository"
+	searchHistoryEncryptUseCase "search_encrypt/internal/search_history_encrypt/usecase"
+
+	invalidEncryptionRepo "search_encrypt/internal/invalid_encryption/repository"
+	invalidHistoryEncryptionRepo "search_encrypt/internal/invalid_history_encryption/repository"
 
 	"time"
 
@@ -51,13 +55,20 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-
 	invalidEncryptDB.Conn().AutoMigrate(&domain.InvalidEncryption{})
-	invalidEncryptionRepository := invalidEncryptionRepo.NewInvalidEncryptReposiotry(invalidEncryptDB.Conn())
+	invalidEncryptDB.Conn().AutoMigrate(&domain.InvalidHistoryEncryption{})
 
-	searchRepository := searchEncryptRepo.NewSearchEncryptRepository(customerDomainDb.Conn())
-	searchUseCase := searchEncryptUseCase.NewSearchEncryptUseCase(time.Duration(3)*time.Minute, searchRepository, invalidEncryptionRepository)
-	searchHandler := searchEncryptHandler.NewSearchEncryptCmdHandler(searchUseCase, rootCmd)
+
+	invalidEncryptionRepository := invalidEncryptionRepo.NewInvalidEncryptReposiotry(invalidEncryptDB.Conn())
+	invalidHistoryEncryptionRepository := invalidHistoryEncryptionRepo.NewInvalidHistoryEncryptReposiotry(invalidEncryptDB.Conn())
+
+	searchEncryptRepository := searchEncryptRepo.NewSearchEncryptRepository(customerDomainDb.Conn())
+	searchEncryptUseCase := searchEncryptUseCase.NewSearchEncryptUseCase(time.Duration(3)*time.Minute, searchEncryptRepository, invalidEncryptionRepository)
+	
+	searchHistoryEncryptRepository := searchHistoryEncryptRepo.NewSearchHistoryEncryptRepository(customerDomainDb.Conn())
+	searchHistoryEncryptUseCase := searchHistoryEncryptUseCase.NewSearchHistoryEncryptUseCase(time.Duration(3)*time.Minute, searchHistoryEncryptRepository,invalidHistoryEncryptionRepository)
+
+	searchHandler := searchEncryptHandler.NewSearchEncryptCmdHandler(searchEncryptUseCase,searchHistoryEncryptUseCase ,rootCmd)
 	searchEncryptHandler.Initialize(rootCmd, searchHandler)
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Execute()

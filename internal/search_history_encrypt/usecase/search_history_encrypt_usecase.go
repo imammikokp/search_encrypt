@@ -12,32 +12,32 @@ import (
 	"gorm.io/gorm"
 )
 
-type searchEncryptUseCase struct {
-	customerRepository domain.SearchEncryptRepository
-	InvalidEncryptionRepository domain.InvalidEncryptionRepository
+type searchHistoryEncryptUseCase struct {
+	SearchHistoryEncryptRepository domain.SearchHistoryEncryptRepository
+	InvalidHistoryEncryptionRepository domain.InvalidHistoryEncryptionRepository
 	contexTimeout      time.Duration
 }
 
-func NewSearchEncryptUseCase(contextTimeout time.Duration, customerRepository domain.SearchEncryptRepository,InvalidEncryptionRepository domain.InvalidEncryptionRepository) domain.SearchEncryptUseCase {
-	return &searchEncryptUseCase{
-		customerRepository: customerRepository,
-		InvalidEncryptionRepository:InvalidEncryptionRepository,
+func NewSearchHistoryEncryptUseCase(contextTimeout time.Duration, searchHistoryEncryptRepository domain.SearchHistoryEncryptRepository,InvalidHistoryEncryptionRepository domain.InvalidHistoryEncryptionRepository) domain.SearchHistoryEncryptUseCase {
+	return &searchHistoryEncryptUseCase{
+		SearchHistoryEncryptRepository: searchHistoryEncryptRepository,
+		InvalidHistoryEncryptionRepository:InvalidHistoryEncryptionRepository,
 		contexTimeout:      contextTimeout,
 	}
 }
 
-func (r searchEncryptUseCase) CheckLength() (int64, error) {
+func (r searchHistoryEncryptUseCase) CheckLength() (int64, error) {
 	ctxB := context.Background()
 	ctx, cancel := context.WithTimeout(ctxB, r.contexTimeout)
 	defer cancel()
-	count, err := r.customerRepository.GetCountAll(ctx)
+	count, err := r.SearchHistoryEncryptRepository.GetCountAll(ctx)
 	if err != nil {
 		return 0, err
 	}
 	return count, nil
 }
 
-func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error) {
+func (r searchHistoryEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId int) (validAmount int, invalidAmount int, funcError error) {
 	ctxB := context.Background()
 	ctx, cancel := context.WithTimeout(ctxB, r.contexTimeout)
 	defer cancel()
@@ -57,7 +57,6 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 			if findEncrypt, finish, err := r.searchEncyrpt(ctx, parent, child, InvalidEncrypts); err != nil {
 				return 0, 0, err
 			} else {
-				fmt.Println("search encytp ->",findEncrypt,finish,err)
 				if finish {
 					break
 				}
@@ -67,12 +66,12 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 			}
 		}
 
-		var invalidEncryptModels []domain.InvalidEncryption
+		var invalidHistoryEncryptModels []domain.InvalidHistoryEncryption
 		for _, v := range InvalidEncrypts {
-			invalidEncryptModels = append(invalidEncryptModels, domain.InvalidEncryption{CustomerID: v})
+			invalidHistoryEncryptModels = append(invalidHistoryEncryptModels, domain.InvalidHistoryEncryption{HistoryID: v})
 		}
-		fmt.Println("invalid ->",invalidEncryptModels)
-		if err:=r.InvalidEncryptionRepository.Inserts(ctx,invalidEncryptModels);err!=nil{
+
+		if err:=r.InvalidHistoryEncryptionRepository.Inserts(ctx,invalidHistoryEncryptModels);err!=nil{
 			return 0,0,err
 		}
 
@@ -84,18 +83,18 @@ func (r searchEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int, maxId 
 	return
 }
 
-func (r searchEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.Node, child *domain.Node, inEncryptResults []int) (*[]int, bool, error) {
+func (r searchHistoryEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.Node, child *domain.Node, inEncryptResults []int) (*[]int, bool, error) {
 	// encrypt customer
-	var modelEncrypt []domain.EncryptCustomer
+	var modelEncrypt []domain.EncryptHistoryCustomer
 
-	if err := r.customerRepository.FetchByRange(ctx, &modelEncrypt, inEncryptResults, child.Min, child.Max); err != nil {
+	if err := r.SearchHistoryEncryptRepository.FetchByRange(ctx, &modelEncrypt, inEncryptResults, child.Min, child.Max); err != nil {
 
 		if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 			//min dan max id jaraknya 1
 			if (child.Max - child.Min) <= 1 {
 				var inEncryptResult []int
-				var encyrptCustomer domain.EncryptCustomer
-				if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Min); err != nil {
+				var encyrptCustomer domain.EncryptHistoryCustomer
+				if err := r.SearchHistoryEncryptRepository.FindById(ctx, &encyrptCustomer, child.Min); err != nil {
 					if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 						//simpan invalid
 						fmt.Println("->child test",parent,child)
@@ -110,7 +109,7 @@ func (r searchEncryptUseCase) searchEncyrpt(ctx context.Context, parent *domain.
 				}
 
 				if child.Min != child.Max{
-					if err := r.customerRepository.FindById(ctx, &encyrptCustomer, child.Max); err != nil {
+					if err := r.SearchHistoryEncryptRepository.FindById(ctx, &encyrptCustomer, child.Max); err != nil {
 						if strings.Contains(err.Error(), "SCP Encrypt Fuction") {
 							//simpan invalid
 							fmt.Println("->child test",parent,child)
