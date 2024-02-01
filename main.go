@@ -35,22 +35,28 @@ func main() {
 		// Run: func(cmd *cobra.Command, args []string) { },
 	}
 
-
 	viper.SetConfigName("app.json")
 	viper.SetConfigType("json")
 	viper.AddConfigPath("./conf/")
 	err := viper.ReadInConfig()
-    if err != nil {
-        fmt.Printf("Error reading config file: %s\n", err)
-        return
-    }
-	databaseCustomersConf:=viper.GetStringMapString("database_customers")
+	if err != nil {
+		fmt.Printf("Error reading config file: %s\n", err)
+		return
+	}
+	databaseCustomersConf := viper.GetStringMapString("database_customers")
 	customerDomainDb, err := database.New(database.ConfigFromEnvironment(databaseCustomersConf))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	databaseInvalidEncryptConf:=viper.GetStringMapString("database_invalid_encryption_customers")
+	//database_customers_history
+	databaseCustomersHistoryConf := viper.GetStringMapString("database_customers_history")
+	customerHistoryDomainDb, err := database.New(database.ConfigFromEnvironment(databaseCustomersHistoryConf))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	databaseInvalidEncryptConf := viper.GetStringMapString("database_invalid_encryption_customers")
 	invalidEncryptDB, err := database.New(database.ConfigFromEnvironment(databaseInvalidEncryptConf))
 	if err != nil {
 		panic(err.Error())
@@ -58,17 +64,16 @@ func main() {
 	invalidEncryptDB.Conn().AutoMigrate(&domain.InvalidEncryption{})
 	invalidEncryptDB.Conn().AutoMigrate(&domain.InvalidHistoryEncryption{})
 
-
 	invalidEncryptionRepository := invalidEncryptionRepo.NewInvalidEncryptReposiotry(invalidEncryptDB.Conn())
 	invalidHistoryEncryptionRepository := invalidHistoryEncryptionRepo.NewInvalidHistoryEncryptReposiotry(invalidEncryptDB.Conn())
 
 	searchEncryptRepository := searchEncryptRepo.NewSearchEncryptRepository(customerDomainDb.Conn())
 	searchEncryptUseCase := searchEncryptUseCase.NewSearchEncryptUseCase(time.Duration(3)*time.Minute, searchEncryptRepository, invalidEncryptionRepository)
-	
-	searchHistoryEncryptRepository := searchHistoryEncryptRepo.NewSearchHistoryEncryptRepository(customerDomainDb.Conn())
-	searchHistoryEncryptUseCase := searchHistoryEncryptUseCase.NewSearchHistoryEncryptUseCase(time.Duration(3)*time.Minute, searchHistoryEncryptRepository,invalidHistoryEncryptionRepository)
 
-	searchHandler := searchEncryptHandler.NewSearchEncryptCmdHandler(searchEncryptUseCase,searchHistoryEncryptUseCase ,rootCmd)
+	searchHistoryEncryptRepository := searchHistoryEncryptRepo.NewSearchHistoryEncryptRepository(customerHistoryDomainDb.Conn())
+	searchHistoryEncryptUseCase := searchHistoryEncryptUseCase.NewSearchHistoryEncryptUseCase(time.Duration(3)*time.Minute, searchHistoryEncryptRepository, invalidHistoryEncryptionRepository)
+
+	searchHandler := searchEncryptHandler.NewSearchEncryptCmdHandler(searchEncryptUseCase, searchHistoryEncryptUseCase, rootCmd)
 	searchEncryptHandler.Initialize(rootCmd, searchHandler)
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Execute()

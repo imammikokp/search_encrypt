@@ -155,7 +155,7 @@ func (r EncryptCustomer) TableName() string {
 }
 
 type EncryptHistoryCustomer struct {
-	ID                           int `gorm:"primarykey;autoIncrement:true"`
+	ID                           int    `gorm:"primarykey;autoIncrement:true"`
 	CustomerId                   int    `gorm:"column:customer_id"`
 	LegalName                    string `gorm:"type:varchar(150);column:legal_name;index:idx_customers_varchar"`
 	FullName                     string `gorm:"type:varchar(150);column:full_name"`
@@ -177,7 +177,7 @@ type EncryptHistoryCustomer struct {
 }
 
 func (r EncryptHistoryCustomer) TableName() string {
-	return "history.customers"
+	return "customers"
 }
 
 type SearchEncryptRepository interface {

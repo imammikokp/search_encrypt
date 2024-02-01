@@ -13,6 +13,20 @@
     "maxLifeTimeConn": 450,
     "maxIdleTimeConn": 450
   },
+  "database_customers_history": {
+      "debug": true,
+      "driver": "postgres",
+      "host": "",
+      "username": "",
+      "password": "",
+      "name": "historical",
+      "port": ,
+      "options": "TimeZone=Asia/Jakarta",
+      "maxOpenConn": 100,
+      "maxIdleConn": 100,
+      "maxLifeTimeConn": 450,
+      "maxIdleTimeConn": 450
+    },
   "database_invalid_encryption_customers": {
     "debug": true,
     "driver": "",

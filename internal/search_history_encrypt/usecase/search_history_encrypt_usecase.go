@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"search_encrypt/domain"
 	"strings"
 
@@ -66,6 +67,7 @@ func (r searchHistoryEncryptUseCase) FindAndSaveInvalidEncryptByRange(minId int,
 
 	var invalidHistoryEncryptModels []domain.InvalidHistoryEncryption
 	if InvalidEncrypts != nil {
+		fmt.Println("InvalidEncrypts --------------", InvalidEncrypts)
 		for _, v := range InvalidEncrypts {
 			invalidHistoryEncryptModels = append(invalidHistoryEncryptModels, domain.InvalidHistoryEncryption{HistoryID: v})
 		}
